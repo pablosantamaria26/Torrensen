@@ -15,7 +15,7 @@
   --border:rgba(255,255,255,0.07); --border-red:rgba(212,43,43,0.4);
   --text:#F0F0F0; --muted:#888; --dim:#555;
   --green:#22C55E; --yellow:#EAB308; --orange:#F97316;
-  --fluo:#CCFF00;
+  --fluo:#CCFF00; /* Verde amarillento fluo sutil */
   --sidebar:260px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -61,7 +61,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 #sidebar{width:var(--sidebar);background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;overflow-y:auto;transition:transform .28s cubic-bezier(.32,.72,0,1)}
 .sidebar-logo{padding:28px 24px 20px;border-bottom:1px solid var(--border)}
 .sidebar-logo .brand{font-family:'Bebas Neue',cursive;font-size:28px;letter-spacing:2px;line-height:1}
-.sidebar-logo .sub{font-size:10px;color:var(--dim);letter-spacing:3px;text-transform:uppercase;margin-top:4px}
+.sidebar-logo .sub{font-size:10px;color:var(--red);letter-spacing:3px;text-transform:uppercase;margin-top:4px}
 .sidebar-nav{padding:16px 0;flex:1}
 .nav-label{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--dim);padding:12px 24px 6px}
 .nav-item{display:flex;align-items:center;gap:10px;padding:10px 24px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .18s;border-left:2px solid transparent}
@@ -69,7 +69,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .nav-item.active{color:var(--red);border-left-color:var(--red);background:var(--red-glow)}
 .nav-icon{width:16px;text-align:center;font-size:14px}
 .brand-badge{display:inline-block;font-size:9px;font-weight:700;letter-spacing:1.5px;padding:2px 6px;border-radius:2px;margin-left:auto}
-.brand-badge.langfeite{background:var(--fluo);color:#000}
+.brand-badge.langfeite{background:#CCFF00;color:#000}
 .brand-badge.ado{background:#FF8C00;color:#000}
 .brand-badge.eride{background:var(--red);color:#fff}
 .sidebar-footer{padding:16px 24px;border-top:1px solid var(--border);font-size:11px;color:var(--dim);line-height:1.6}
@@ -119,7 +119,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .product-card:hover{border-color:var(--border-red);transform:translateY(-2px);box-shadow:0 8px 32px rgba(212,43,43,.12)}
 .product-card.in-compare{border-color:var(--red);box-shadow:0 0 0 1px var(--red)}
 .card-brand-bar{height:3px;width:100%}
-.card-brand-bar.langfeite{background:var(--fluo)}
+.card-brand-bar.langfeite{background:#CCFF00}
 .card-brand-bar.ado{background:#FF8C00}
 .card-brand-bar.eride{background:var(--red)}
 .card-brand-bar.acc{background:var(--dim)}
@@ -127,16 +127,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .card-img img{width:100%;height:100%;object-fit:contain;padding:12px}
 .card-img-emoji{font-size:56px}
 .card-img::after{content:'';position:absolute;bottom:0;left:0;right:0;height:40px;background:linear-gradient(to top,var(--bg2),transparent)}
-/* stock text in card */
-.card-stock-text{font-size:11px;font-weight:700;display:flex;align-items:center;gap:6px;margin-bottom:4px}
-.card-stock-text.ok{color:#22C55E}
-.card-stock-text.low{color:#EAB308}
-.card-stock-text.out{color:#ff6b6b}
-.card-stock-text .stock-dot-small{width:6px;height:6px;border-radius:50%}
-.card-stock-text.ok .stock-dot-small{background:#22C55E;box-shadow:0 0 6px rgba(34,197,94,0.4)}
-.card-stock-text.low .stock-dot-small{background:#EAB308;box-shadow:0 0 6px rgba(234,179,8,0.4)}
-.card-stock-text.out .stock-dot-small{background:#ff6b6b;box-shadow:0 0 6px rgba(212,43,43,0.4)}
-.compare-badge{position:absolute;top:10px;right:10px;z-index:2;background:var(--red);color:#fff;font-size:9px;font-weight:700;letter-spacing:1px;padding:3px 7px;border-radius:3px;display:none}
+/* stock badge on card MEJORADO */
+.card-stock-badge{position:absolute;top:12px;left:12px;z-index:2;font-size:10px;font-weight:800;letter-spacing:0.5px;padding:4px 10px;border-radius:20px;text-transform:uppercase;box-shadow:0 4px 15px rgba(0,0,0,0.5);}
+.card-stock-badge.ok{background:var(--fluo);color:#000;border:none;}
+.card-stock-badge.low{background:var(--yellow);color:#000;border:none;}
+.card-stock-badge.out{background:var(--red);color:#fff;border:none;}
+.compare-badge{position:absolute;top:12px;right:12px;z-index:2;background:var(--red);color:#fff;font-size:9px;font-weight:700;letter-spacing:1px;padding:3px 7px;border-radius:3px;display:none;box-shadow:0 4px 15px rgba(0,0,0,0.5);}
 .product-card.in-compare .compare-badge{display:block}
 .card-body{padding:16px;flex:1;display:flex;flex-direction:column;gap:8px}
 .card-brand-tag{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--dim)}
@@ -185,12 +181,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .price-row{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--bg3);border-radius:6px;border:1px solid var(--border)}
 .price-row.highlight{border-color:var(--red);background:var(--red-glow)}
 .price-label{font-size:11px;color:var(--muted)}
+.price-label strong{display:block;font-size:9px;color:var(--dim)}
 .price-val{font-family:'Bebas Neue',cursive;font-size:20px}
 .price-row.highlight .price-val{color:var(--red)}
 .modal-right{flex:1;min-width:200px;display:flex;flex-direction:column;gap:16px}
 .modal-desc{font-size:13px;color:var(--muted);line-height:1.6}
 .modal-stock-info{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:6px;font-size:12px;font-weight:600}
-.modal-stock-info.ok{background:rgba(34,197,94,.1);color:#22C55E;border:1px solid rgba(34,197,94,.2)}
+.modal-stock-info.ok{background:rgba(204,255,0,.1);color:var(--fluo);border:1px solid rgba(204,255,0,.2)}
 .modal-stock-info.low{background:rgba(234,179,8,.1);color:#EAB308;border:1px solid rgba(234,179,8,.2)}
 .modal-stock-info.out{background:rgba(212,43,43,.1);color:#ff6b6b;border:1px solid rgba(212,43,43,.2)}
 .specs-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -221,7 +218,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .compare-table th:first-child{width:160px;font-size:11px;font-family:'DM Sans',sans-serif;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--dim)}
 .compare-table td{padding:12px 16px;border:1px solid var(--border);font-size:13px;vertical-align:top}
 .compare-table td:first-child{color:var(--dim);font-size:11px;text-transform:uppercase;letter-spacing:.5px;background:var(--bg2);font-weight:600}
-.compare-winner{color:var(--green)!important;font-weight:700}
+.compare-winner{color:var(--fluo)!important;font-weight:700}
 
 /* ── CART ── */
 #cart-panel{position:fixed;top:0;right:0;bottom:0;z-index:300;width:380px;background:var(--bg2);border-left:1px solid var(--border);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .28s cubic-bezier(.32,.72,0,1);box-shadow:-8px 0 40px rgba(0,0,0,.4)}
@@ -238,7 +235,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .cart-item-brand{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:1px}
 .cart-item-price{font-family:'Bebas Neue',cursive;font-size:16px;color:var(--muted)}
 .cart-item-stock{font-size:10px;margin-top:4px}
-.cart-item-stock.ok{color:var(--green)}
+.cart-item-stock.ok{color:var(--fluo)}
 .cart-item-stock.low{color:var(--yellow)}
 .cart-item-stock.out{color:#ff6b6b}
 .cart-item-qty{display:flex;align-items:center;gap:6px;margin-top:6px}
@@ -289,7 +286,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 ::-webkit-scrollbar-thumb:hover{background:#444}
 
 /* ── REALTIME indicator ── */
-.realtime-dot{width:8px;height:8px;border-radius:50%;background:var(--fluo);box-shadow:0 0 6px rgba(204,255,0,0.4);display:inline-block;animation:pulse 2s infinite;margin-right:6px}
+.realtime-dot{width:8px;height:8px;border-radius:50%;background:var(--fluo);display:inline-block;animation:pulse 2s infinite;margin-right:6px}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 
 /* ── RESPONSIVE ── */
@@ -309,14 +306,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 </head>
 <body>
 
-<!-- LOADER -->
 <div id="loader">
   <div class="loader-logo">TOR<span>REN</span>SEN</div>
   <div class="loader-bar"><div class="loader-progress"></div></div>
   <div class="loader-text">Conectando con servidor...</div>
 </div>
 
-<!-- LOGIN -->
 <div id="login-screen" style="display:none">
   <div class="login-brand">
     <div class="name">TOR<span>REN</span>SEN</div>
@@ -329,7 +324,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     </div>
     <div id="login-error" class="login-error"></div>
 
-    <!-- REGISTER FORM -->
     <div id="form-register">
       <div class="login-sub" style="margin-bottom:12px">Completá tus datos para acceder al catálogo mayorista.</div>
       <div class="form-group">
@@ -355,7 +349,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <button class="btn-primary" id="btn-register" onclick="doRegister()">Crear cuenta y acceder →</button>
     </div>
 
-    <!-- LOGIN FORM -->
     <div id="form-login" style="display:none">
       <div class="form-group">
         <label class="form-label">Email</label>
@@ -374,13 +367,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   </div>
 </div>
 
-<!-- APP -->
 <div id="app">
-  <!-- SIDEBAR -->
   <nav id="sidebar">
     <div class="sidebar-logo">
-      <div class="brand">TOR<span style="color:var(--red)">REN</span>SEN</div>
-      <div class="sub"><span style="color:var(--fluo);font-size:10px;margin-right:4px;vertical-align:middle;text-shadow:0 0 5px rgba(204,255,0,0.5)">●</span>PORTAL DISTRIBUIDORES</div>
+      <div class="brand">TORRENSEN</div>
+      <div class="sub">Portal distribuidores</div>
     </div>
     <div class="sidebar-nav">
       <div class="nav-label">Catálogo</div>
@@ -413,7 +404,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     </div>
   </nav>
 
-  <!-- MAIN -->
   <div id="main">
     <div id="topbar">
       <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
@@ -439,7 +429,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
           <div class="section-count" id="section-count">Cargando productos...</div>
         </div>
         <div class="stock-legend">
-          <span><span class="stock-dot" style="background:var(--green)"></span>Stock disponible</span>
+          <span><span class="stock-dot" style="background:var(--fluo)"></span>Stock disponible</span>
           <span><span class="stock-dot" style="background:var(--yellow)"></span>Stock bajo</span>
           <span><span class="stock-dot" style="background:#ff6b6b"></span>Sin stock</span>
         </div>
@@ -453,14 +443,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
         <button class="filter-tab" onclick="filterType('accesorio',this)">Accesorios</button>
       </div>
       <div class="product-grid" id="product-grid">
-        <!-- skeletons -->
-        ${Array(8).fill('<div class="skeleton-card"><div class="skeleton" style="height:3px"></div><div class="skeleton" style="height:160px;border-radius:0"></div><div style="padding:16px;display:flex;flex-direction:column;gap:8px"><div class="skeleton" style="height:10px;width:40%;border-radius:4px"></div><div class="skeleton" style="height:10px;width:60%;border-radius:4px"></div><div class="skeleton" style="height:22px;width:80%;border-radius:4px"></div><div class="skeleton" style="height:32px;border-radius:4px;margin-top:auto"></div></div></div>').join('')}
+        ${Array(8).fill('<div class="skeleton-card"><div class="skeleton" style="height:3px"></div><div style="padding:16px;display:flex;flex-direction:column;gap:12px"><div class="skeleton" style="height:130px;border-radius:6px"></div><div class="skeleton" style="height:12px;width:60%;border-radius:4px"></div><div class="skeleton" style="height:22px;width:80%;border-radius:4px"></div><div class="skeleton" style="height:32px;border-radius:4px"></div></div></div>').join('')}
       </div>
     </div>
   </div>
 </div>
 
-<!-- PRODUCT MODAL -->
 <div class="modal-overlay" id="product-modal" onclick="closeModalOutside(event)">
   <div class="modal" id="modal-inner">
     <div class="modal-header">
@@ -493,7 +481,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   </div>
 </div>
 
-<!-- COMPARE PANEL -->
 <div id="compare-panel">
   <div class="compare-header">
     <div class="compare-title">COMPARAR <span>MODELOS</span></div>
@@ -502,7 +489,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   <div class="compare-body" id="compare-body"></div>
 </div>
 
-<!-- CART PANEL -->
 <div id="cart-panel">
   <div class="cart-header">
     <div class="cart-title">MI PEDIDO</div>
@@ -519,7 +505,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   </div>
 </div>
 
-<!-- ORDER SUCCESS -->
 <div class="order-success" id="order-success">
   <div class="order-card">
     <div class="order-icon" id="order-icon">✅</div>
@@ -534,7 +519,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   </div>
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast">
   <span class="toast-icon" id="toast-icon">✓</span>
   <span id="toast-msg">Producto agregado</span>
@@ -563,8 +547,8 @@ let currentUser = null;
 let currentProfile = null;
 let allProducts = [];
 let filteredProducts = [];
-let cart =[];
-let compareList =[];
+let cart = [];
+let compareList = [];
 let currentProduct = null;
 let currentBrand = 'all';
 let currentType = 'all';
@@ -633,7 +617,7 @@ async function doRegister() {
     return;
   }
   if (pass.length < 6) {
-    showAuthError('La contraseña debe tener al least 6 caracteres.');
+    showAuthError('La contraseña debe tener al menos 6 caracteres.');
     return;
   }
 
@@ -686,7 +670,7 @@ async function doLogout() {
   currentUser = null;
   currentProfile = null;
   cart = [];
-  compareList =[];
+  compareList = [];
   location.reload();
 }
 
@@ -842,8 +826,8 @@ function renderProducts() {
   grid.innerHTML = filteredProducts.map((p, i) => {
     const inCompare = compareList.includes(p.id);
     const ss = getStockStatus(p.stock);
-    const stockLabel = ss === 'out' ? 'Sin stock' : `${p.stock} unidades`;
-    const specs = p.specs ? Object.entries(p.specs).slice(0, 3) :[];
+    const stockLabel = ss === 'ok' ? `Stock: ${p.stock}u` : ss === 'low' ? `Stock bajo: ${p.stock}u` : 'Sin stock';
+    const specs = p.specs ? Object.entries(p.specs).slice(0, 3) : [];
     const imgHtml = p.image_urls && p.image_urls.length
       ? `<img src="${p.image_urls[0]}" alt="${p.name}" onerror="this.style.display='none';this.nextSibling.style.display='block'">`
       + `<span class="card-img-emoji" style="display:none">${p.icon_emoji || '📦'}</span>`
@@ -854,11 +838,10 @@ function renderProducts() {
          style="animation-delay:${i * 0.04}s"
          onclick="openProduct('${p.id}')">
       <div class="compare-badge">EN COMPARATIVA</div>
-      
+      <div class="card-stock-badge ${ss}">${stockLabel}</div>
       <div class="card-brand-bar ${p.brand}"></div>
       <div class="card-img">${imgHtml}</div>
       <div class="card-body">
-        <div class="card-stock-text ${ss}"><span class="stock-dot-small"></span>${stockLabel}</div>
         <div class="card-brand-tag">${p.brand_name} · ${p.type}</div>
         <div class="card-name">${p.name}</div>
         <div class="card-desc">${p.description || ''}</div>
@@ -906,23 +889,23 @@ function openProduct(id) {
   renderModalStockInfo(p);
 
   // Precios
-  const priceConf =[
-    { key: 'price_publico', label: 'Precio público' },
-    { key: 'price_x5', label: 'x5 unidades' },
-    { key: 'price_x15', label: 'x15 unidades' },
-    { key: 'price_x10', label: 'x10 unidades' },
-    { key: 'price_x20', label: 'x20 unidades' },
+  const priceConf = [
+    { key: 'price_publico', label: 'Precio público', sub: '' },
+    { key: 'price_x5', label: 'x5 unidades', sub: '' },
+    { key: 'price_x15', label: 'x15 unidades', sub: '' },
+    { key: 'price_x10', label: 'x10 unidades', sub: '' },
+    { key: 'price_x20', label: 'x20 unidades', sub: '' },
   ];
   document.getElementById('modal-prices').innerHTML = priceConf
     .filter(pc => p[pc.key])
     .map(pc => `
       <div class="price-row ${pc.key === 'price_x5' ? 'highlight' : ''}">
-        <div class="price-label">${pc.label}</div>
+        <div class="price-label">${pc.label}${pc.sub ? `<strong>${pc.sub}</strong>` : ''}</div>
         <div class="price-val">USD ${Number(p[pc.key]).toLocaleString()}</div>
       </div>`).join('');
 
   // Specs
-  const specs = p.specs ? Object.entries(p.specs) :[];
+  const specs = p.specs ? Object.entries(p.specs) : [];
   document.getElementById('modal-specs').innerHTML = specs.map(([k, v]) => `
     <div class="spec-row">
       <div class="spec-key">${k}</div>
@@ -939,7 +922,7 @@ function openProduct(id) {
 }
 
 function renderModalImage(p) {
-  const imgs = p.image_urls && p.image_urls.length ? p.image_urls :[];
+  const imgs = p.image_urls && p.image_urls.length ? p.image_urls : [];
   const imgEl = document.getElementById('modal-img');
 
   if (imgs.length === 0) {
@@ -959,7 +942,7 @@ function renderModalImage(p) {
 }
 
 function changeImg(dir) {
-  const imgs = currentProduct.image_urls ||[];
+  const imgs = currentProduct.image_urls || [];
   if (!imgs.length) return;
   currentImgIndex = (currentImgIndex + dir + imgs.length) % imgs.length;
   goToImg(currentImgIndex);
@@ -969,7 +952,7 @@ function goToImg(idx) {
   if (!currentProduct) return;
   currentImgIndex = idx;
   const imgEl = document.getElementById('modal-img');
-  const imgs = currentProduct.image_urls ||[];
+  const imgs = currentProduct.image_urls || [];
   const mainImg = imgEl.querySelector('img');
   if (mainImg) mainImg.src = imgs[idx];
   imgEl.querySelectorAll('.img-dot').forEach((d, i) => d.classList.toggle('active', i === idx));
@@ -1161,7 +1144,7 @@ async function confirmOrder() {
     showOrderResult(order, reserveResult);
 
     // 7. Limpiar carrito
-    cart =[];
+    cart = [];
     updateCartCount();
 
   } catch (err) {
@@ -1183,7 +1166,7 @@ function showOrderResult(order, result) {
 
   const partialEl = document.getElementById('order-partial');
   if (isPartial) {
-    const insufficient = result.items?.filter(i => i.status === 'insufficient') ||[];
+    const insufficient = result.items?.filter(i => i.status === 'insufficient') || [];
     partialEl.innerHTML = `<strong>⚠️ Stock insuficiente en:</strong><br>` +
       insufficient.map(i => {
         const p = allProducts.find(x => x.id === i.product_id);
@@ -1283,7 +1266,7 @@ function generatePDF(order) {
   doc.autoTable({
     startY: 88,
     head: [['PRODUCTO', 'MARCA', 'CANT.', 'PRECIO UNIT.', 'SUBTOTAL', 'ESTADO']],
-    body: order.items.map(item =>[
+    body: order.items.map(item => [
       item.product_name,
       item.product_brand,
       item.quantity,
@@ -1292,8 +1275,8 @@ function generatePDF(order) {
       item.stock_status === 'ok' ? '✓ OK' : item.stock_status === 'insufficient' ? '⚠ Insuficiente' : 'Pendiente'
     ]),
     styles: {
-      fillColor:[26, 26, 26],
-      textColor:[240, 240, 240],
+      fillColor: [26, 26, 26],
+      textColor: [240, 240, 240],
       fontSize: 9,
       cellPadding: 4
     },
@@ -1303,7 +1286,7 @@ function generatePDF(order) {
       fontStyle: 'bold',
       fontSize: 9
     },
-    alternateRowStyles: { fillColor:[20, 20, 20] },
+    alternateRowStyles: { fillColor: [20, 20, 20] },
     columnStyles: {
       0: { cellWidth: 55 },
       1: { cellWidth: 35 },
@@ -1381,7 +1364,7 @@ function closeCompare() { document.getElementById('compare-panel').classList.rem
 
 function renderCompare() {
   const products = compareList.map(id => allProducts.find(p => p.id === id));
-  const allKeys =[...new Set(products.flatMap(p => p.specs ? Object.keys(p.specs) : []))];
+  const allKeys = [...new Set(products.flatMap(p => p.specs ? Object.keys(p.specs) : []))];
   const body = document.getElementById('compare-body');
   body.innerHTML = `
     <table class="compare-table">
@@ -1390,7 +1373,7 @@ function renderCompare() {
         ${products.map(p => `<th>${p.name}<br>
           <small style="font-family:'DM Sans';font-size:11px;font-weight:400;color:var(--muted)">${p.brand_name}</small><br>
           <small style="font-family:'DM Sans';font-size:13px;font-weight:700;color:var(--red)">USD ${getPrice(p).toLocaleString()}</small>
-          <br><small style="font-size:10px;color:${p.stock > 3 ? 'var(--green)' : p.stock > 0 ? 'var(--yellow)' : '#ff6b6b'}">Stock: ${p.stock}u</small>
+          <br><small style="font-size:10px;color:${p.stock > 3 ? 'var(--fluo)' : p.stock > 0 ? 'var(--yellow)' : '#ff6b6b'}">Stock: ${p.stock}u</small>
         </th>`).join('')}
       </tr></thead>
       <tbody>
@@ -1429,7 +1412,7 @@ function showToast(msg, isError = false) {
 // ═══════════════════════════════════════════════════════
 // DATOS DEMO (si Supabase no está configurado)
 // ═══════════════════════════════════════════════════════
-const LOCAL_PRODUCTS =[
+const LOCAL_PRODUCTS = [
   { id:'lf-coupe', brand:'langfeite', brand_name:'Langfeite', type:'monopatín', icon_emoji:'🛴', name:'Coupé',
     description:'Monopatín eléctrico de entrada. NFC, suspensión semi-hidráulica, 9.5" Tubeless.',
     price_publico:1350, price_x5:910, price_x15:820, stock:12, image_urls:[],
@@ -1476,4 +1459,23 @@ const LOCAL_PRODUCTS =[
     specs:{ Motor:'5000W / 12000W pico', Batería:'72V/40Ah Samsung', Autonomía:'80-145 km', Velocidad:'96 km/h', Peso:'63 kg' }},
   { id:'acc-valija-lf', brand:'langfeite', brand_name:'Langfeite', type:'accesorio', icon_emoji:'👜', name:'Valija Langfeite',
     description:'Valija de manillar para monopatines Langfeite. Rígida con reflectivos.',
-    price_publico:40, price_x5:25, price_x15:20, stock:30, image_urls:
+    price_publico:40, price_x5:25, price_x15:20, stock:30, image_urls:[],
+    specs:{ Compatible:'Monopatines Langfeite', Tipo:'Manillar rígida' }},
+];
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeProductModal(); closeCart(); closeCompare(); }
+  if (e.key === 'Enter') {
+    if (document.getElementById('login-screen').style.display === 'flex') {
+      const tab = document.getElementById('tab-login').classList.contains('active');
+      tab ? doLogin() : doRegister();
+    }
+  }
+});
+
+// ── ARRANCAR ──
+init();
+</script>
+</body>
+</html>
