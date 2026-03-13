@@ -1619,3 +1619,22 @@ const LOCAL_PRODUCTS =[
   { id:'acc-valija-lf', brand:'langfeite', brand_name:'Langfeite', type:'accesorio', icon_emoji:'👜', name:'Valija Langfeite',
     description:'Valija de manillar para monopatines Langfeite. Rígida con reflectivos.',
     price_publico:40, price_x5:25, price_x15:20, stock:30, image_urls:
+      specs:{ Compatible:'Monopatines Langfeite', Tipo:'Manillar rígida' }},
+];
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeProductModal(); closeCart(); closeCompare(); }
+  if (e.key === 'Enter') {
+    if (document.getElementById('login-screen').style.display === 'flex') {
+      const tab = document.getElementById('tab-login').classList.contains('active');
+      tab ? doLogin() : doRegister();
+    }
+  }
+});
+
+// ── ARRANCAR ──
+init();
+</script>
+</body>
+</html>
