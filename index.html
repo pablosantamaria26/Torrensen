@@ -1516,16 +1516,16 @@ let rtSetupDone = false;
 let rtOrdersChan = null;
 
 function setupRt() {
-  // Prevent duplicate setup
   if (rtSetupDone) return;
   rtSetupDone = true;
 
-  // Clean any existing channels first
+  // Clean any existing channels
   db.getChannels().forEach(c => db.removeChannel(c));
 
   // Products channel — listen for ALL changes
   rtChan = db.channel('rt-prods')
     .on('postgres_changes',{event:'*',schema:'public',table:'products'}, p => {
+      console.log('🔥 RT EVENTO:', p.eventType, p.new?.name, 'stock:', p.new?.stock);
       const evt = p.eventType;
       const prod = p.new;
 
@@ -1544,17 +1544,41 @@ function setupRt() {
         } else if (appMode === 'admin' || prod.active) {
           allProds.push(prod);
         }
+
+        // Sync cart in real-time for distributors
+        if (appMode === 'dist') {
+          const cartItem = cart.find(c => c.id === prod.id);
+          if (cartItem) {
+            cartItem.stock = prod.stock;
+            cartItem.price = prod.price_x5 || prod.price_publico || 0;
+            if (!prod.active) {
+              cart = cart.filter(c => c.id !== prod.id);
+              toast(`${prod.name} fue retirado del catálogo`, true);
+            }
+            renderCart();
+            updCartN();
+          }
+        }
       } else if (evt === 'DELETE') {
-        allProds = allProds.filter(x => x.id !== (p.old?.id || prod?.id));
+        const delId = p.old?.id || prod?.id;
+        allProds = allProds.filter(x => x.id !== delId);
+        // Remove from cart if deleted
+        if (appMode === 'dist') {
+          cart = cart.filter(c => c.id !== delId);
+          updCartN();
+        }
       }
 
-      // Re-render
+      // Re-render current view
       applyFilter();
+
+      // Update modal if open
       if (curProd?.id === prod?.id) {
         curProd = allProds.find(x => x.id === prod.id);
         if (curProd) renderModalStock();
       }
 
+      // Admin: re-render active section
       if (appMode === 'admin') {
         const sect = document.getElementById('content').dataset?.section;
         if (sect === 'stock-live') renderAdminStockLive();
@@ -1563,20 +1587,20 @@ function setupRt() {
         else if (sect === 'dash') renderAdminDash();
       }
     })
-    .subscribe(status => { console.log('RT prods:', status); });
+    .subscribe(status => { console.log('📡 RT prods:', status); });
 
-  // Orders channel — only for admin
+  // Orders channel — admin only
   if (appMode === 'admin') {
     rtOrdersChan = db.channel('rt-orders')
-      .on('postgres_changes',{event:'*',schema:'public',table:'orders'}, async () => {
+      .on('postgres_changes',{event:'*',schema:'public',table:'orders'}, async (p) => {
+        console.log('📦 RT order:', p.eventType, p.new?.order_number);
         const{data:orders}=await db.from('orders').select('*').order('created_at',{ascending:false});
         if (orders) {
-          // Load profiles separately to avoid join error
           const userIds = [...new Set(orders.map(o => o.user_id).filter(Boolean))];
           const{data:profs}=await db.from('profiles').select('*').in('id', userIds);
           adminOrders = orders.map(o => ({
             ...o,
-            profiles: profs?.find(p => p.id === o.user_id) || null
+            profiles: profs?.find(pr => pr.id === o.user_id) || null
           }));
         }
         const pend = adminOrders.filter(o => o.status === 'pending').length;
@@ -1585,9 +1609,9 @@ function setupRt() {
         const sect = document.getElementById('content').dataset?.section;
         if(sect==='orders') renderAdminOrders();
         if(sect==='dash') renderAdminDash();
-        toast('📦 Pedido actualizado');
+        if(p.eventType==='INSERT') toast('📦 Nuevo pedido recibido!');
       })
-      .subscribe(status => { console.log('RT orders:', status); });
+      .subscribe(status => { console.log('📡 RT orders:', status); });
   }
 }
 
