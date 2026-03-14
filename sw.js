@@ -1,4 +1,4 @@
-const CACHE_NAME = 'torrensen-dist-v2';
+const CACHE_NAME = 'torrensen-dist-v3';
 
 self.addEventListener('install', e => {
   self.skipWaiting();
