@@ -1399,7 +1399,8 @@ async function doLogin() {
 }
 
 async function doLogout() {
-  if(rtChan) db.removeChannel(rtChan);
+  db.getChannels().forEach(c => db.removeChannel(c));
+  rtSetupDone = false;
   localStorage.removeItem('torrensen_role');
   localStorage.removeItem('torrensen_admin_auth');
   await db.auth.signOut();
@@ -1511,23 +1512,32 @@ async function loadProds() {
   applyFilter();
 }
 
+let rtSetupDone = false;
+let rtOrdersChan = null;
+
 function setupRt() {
-  // Products channel — listen for ALL changes (INSERT, UPDATE, DELETE)
-  rtChan=db.channel('rt-prods')
-    .on('postgres_changes',{event:'*',schema:'public',table:'products'},p=>{
+  // Prevent duplicate setup
+  if (rtSetupDone) return;
+  rtSetupDone = true;
+
+  // Clean any existing channels first
+  db.getChannels().forEach(c => db.removeChannel(c));
+
+  // Products channel — listen for ALL changes
+  rtChan = db.channel('rt-prods')
+    .on('postgres_changes',{event:'*',schema:'public',table:'products'}, p => {
       const evt = p.eventType;
       const prod = p.new;
 
       if (evt === 'INSERT') {
-        // New product added
         if (appMode === 'admin' || prod.active) {
-          allProds.push(prod);
+          const exists = allProds.findIndex(x => x.id === prod.id);
+          if (exists === -1) allProds.push(prod);
         }
       } else if (evt === 'UPDATE') {
         const i = allProds.findIndex(x => x.id === prod.id);
         if (i !== -1) {
           allProds[i] = { ...allProds[i], ...prod };
-          // If dist mode and product became inactive, remove it
           if (appMode === 'dist' && !prod.active) {
             allProds.splice(i, 1);
           }
@@ -1535,17 +1545,16 @@ function setupRt() {
           allProds.push(prod);
         }
       } else if (evt === 'DELETE') {
-        allProds = allProds.filter(x => x.id !== p.old.id);
+        allProds = allProds.filter(x => x.id !== (p.old?.id || prod?.id));
       }
 
-      // Re-render current view
+      // Re-render
       applyFilter();
       if (curProd?.id === prod?.id) {
         curProd = allProds.find(x => x.id === prod.id);
         if (curProd) renderModalStock();
       }
 
-      // Admin: re-render whichever section is active
       if (appMode === 'admin') {
         const sect = document.getElementById('content').dataset?.section;
         if (sect === 'stock-live') renderAdminStockLive();
@@ -1554,24 +1563,31 @@ function setupRt() {
         else if (sect === 'dash') renderAdminDash();
       }
     })
-    .subscribe();
+    .subscribe(status => { console.log('RT prods:', status); });
 
-  // Orders channel — admin listens for all order changes
+  // Orders channel — only for admin
   if (appMode === 'admin') {
-    db.channel('rt-orders')
+    rtOrdersChan = db.channel('rt-orders')
       .on('postgres_changes',{event:'*',schema:'public',table:'orders'}, async () => {
-        // Reload orders data
-        const{data:orders}=await db.from('orders').select('*, profiles(empresa,nombre,cuit)').order('created_at',{ascending:false});
-        adminOrders=orders||[];
-        const pend=adminOrders.filter(o=>o.status==='pending').length;
-        const bdg=document.getElementById('pending-bdg');
+        const{data:orders}=await db.from('orders').select('*').order('created_at',{ascending:false});
+        if (orders) {
+          // Load profiles separately to avoid join error
+          const userIds = [...new Set(orders.map(o => o.user_id).filter(Boolean))];
+          const{data:profs}=await db.from('profiles').select('*').in('id', userIds);
+          adminOrders = orders.map(o => ({
+            ...o,
+            profiles: profs?.find(p => p.id === o.user_id) || null
+          }));
+        }
+        const pend = adminOrders.filter(o => o.status === 'pending').length;
+        const bdg = document.getElementById('pending-bdg');
         if(bdg){bdg.style.display=pend>0?'flex':'none';bdg.textContent=pend;}
-        // Re-render current section
-        const sect=document.getElementById('content').dataset?.section;
+        const sect = document.getElementById('content').dataset?.section;
         if(sect==='orders') renderAdminOrders();
         if(sect==='dash') renderAdminDash();
+        toast('📦 Pedido actualizado');
       })
-      .subscribe();
+      .subscribe(status => { console.log('RT orders:', status); });
   }
 }
 
@@ -1989,10 +2005,15 @@ function toggleSidebar(){document.getElementById('sidebar').classList.toggle('op
 // ═══════════════════════════════════════════════════════
 async function loadAdminData(){
   const[{data:orders},{data:profiles}]=await Promise.all([
-    db.from('orders').select('*, profiles(empresa,nombre,cuit)').order('created_at',{ascending:false}),
+    db.from('orders').select('*').order('created_at',{ascending:false}),
     db.from('profiles').select('*').order('empresa')
   ]);
-  adminOrders=orders||[];adminProfiles=profiles||[];
+  adminProfiles=profiles||[];
+  // Manually join profiles to orders
+  adminOrders=(orders||[]).map(o=>({
+    ...o,
+    profiles:adminProfiles.find(p=>p.id===o.user_id)||null
+  }));
   const pend=adminOrders.filter(o=>o.status==='pending').length;
   const bdg=document.getElementById('pending-bdg');
   if(bdg){bdg.style.display=pend>0?'flex':'none';bdg.textContent=pend;}
