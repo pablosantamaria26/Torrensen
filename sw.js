@@ -1,4 +1,4 @@
-const CACHE_NAME = 'torrensen-dist-v3';
+const CACHE_NAME = 'torrensen-dist-v4';
 
 self.addEventListener('install', e => {
   self.skipWaiting();
@@ -13,12 +13,13 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
-  // Network-first strategy — always try network, fallback to cache
+  if (e.request.method !== 'GET' || e.request.url.includes('supabase.co') || e.request.url.includes('resend.com')) {
+    return;
+  }
   e.respondWith(
     fetch(e.request)
       .then(res => {
-        // Cache successful GET responses
-        if (e.request.method === 'GET' && res.status === 200) {
+        if (res.status === 200) {
           const clone = res.clone();
           caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
         }
