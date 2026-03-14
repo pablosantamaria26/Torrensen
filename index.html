@@ -1731,41 +1731,172 @@ function showOrderOk(order,res){
   document.getElementById('order-ok').classList.add('open');
 }
 function closeOrderOk(){document.getElementById('order-ok').classList.remove('open');lastOrder=null;}
-async function sendEmail(order){const{data:{session}}=await db.auth.getSession();await fetch(EDGE_EMAIL,{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${session.access_token}`},body:JSON.stringify({order_id:order.id,order_number:order.order_number,distribuidor:order.profile,items:order.items,total:order.total,torrensen_email:TORRENSEN_EMAIL})});}
+async function sendEmail(order){
+  // Generate PDF as base64 for attachment
+  const pdfB64 = generatePDFBase64(order);
+  await fetch(EDGE_EMAIL,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      order_id:order.id,
+      order_number:order.order_number,
+      distribuidor:order.profile,
+      items:order.items,
+      total:order.total,
+      torrensen_email:TORRENSEN_EMAIL,
+      pdf_base64:pdfB64
+    })
+  });
+}
 
 // ═══════════════════════════════════════════════════════
-// PDF
+// PDF — PREMIUM
 // ═══════════════════════════════════════════════════════
+function generatePDFBase64(order) {
+  const doc = buildPDF(order);
+  // Returns base64 string (without data:uri prefix)
+  return doc.output('datauristring').split(',')[1];
+}
+
 function downloadPDF(){
-  if(!lastOrder)return;
-  const{jsPDF}=window.jspdf;const doc=new jsPDF({unit:'mm',format:'a4'});
-  doc.setFillColor(10,10,10);doc.rect(0,0,210,45,'F');
-  doc.setFont('helvetica','bold');doc.setFontSize(26);doc.setTextColor(212,43,43);doc.text('TORRENSEN',20,22);
-  doc.setFontSize(9);doc.setTextColor(120,120,120);doc.text('PORTAL DE DISTRIBUIDORES',20,29);
-  doc.setFontSize(10);doc.setTextColor(220,220,220);doc.text('ORDEN DE PEDIDO',140,16);
-  doc.setFontSize(18);doc.setTextColor(212,43,43);doc.text(lastOrder.order_number||'OP',140,26);
-  doc.setFontSize(9);doc.setTextColor(120,120,120);doc.text(new Date().toLocaleDateString('es-AR',{day:'2-digit',month:'long',year:'numeric'}),140,33);
-  doc.setFillColor(17,17,17);doc.rect(0,45,210,32,'F');
-  doc.setFontSize(8);doc.setTextColor(90,90,90);doc.text('DISTRIBUIDOR',20,54);
-  doc.setFontSize(12);doc.setTextColor(220,220,220);doc.setFont('helvetica','bold');
-  doc.text(lastOrder.profile?.empresa||'',20,62);
-  doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(120,120,120);
-  doc.text(`${lastOrder.profile?.nombre||''} · CUIT: ${lastOrder.profile?.cuit||''}`,20,68);
-  doc.autoTable({startY:84,head:[['PRODUCTO','MARCA','CANT.','P.UNIT.','SUBTOTAL','ESTADO']],
-    body:lastOrder.items.map(i=>[i.product_name,i.product_brand,i.quantity,`USD ${Number(i.unit_price).toLocaleString()}`,`USD ${Number(i.subtotal).toLocaleString()}`,i.stock_status==='ok'?'✓ OK':'⚠ Revisar']),
-    styles:{fillColor:[24,24,24],textColor:[220,220,220],fontSize:9,cellPadding:4},headStyles:{fillColor:[212,43,43],textColor:[255,255,255],fontStyle:'bold',fontSize:9},alternateRowStyles:{fillColor:[18,18,18]},
-    columnStyles:{0:{cellWidth:55},1:{cellWidth:32},2:{cellWidth:14,halign:'center'},3:{cellWidth:28,halign:'right'},4:{cellWidth:28,halign:'right'},5:{cellWidth:23,halign:'center'}}});
-  const fy=doc.lastAutoTable.finalY+8;
-  doc.setFillColor(212,43,43);doc.rect(130,fy,65,12,'F');
-  doc.setFontSize(9);doc.setTextColor(255,255,255);doc.setFont('helvetica','bold');doc.text('TOTAL ESTIMADO',135,fy+5);
-  doc.setFontSize(13);doc.text(`USD ${Number(lastOrder.total).toLocaleString()}`,135,fy+10.5);
-  doc.setFontSize(8);doc.setTextColor(90,90,90);doc.setFont('helvetica','normal');
-  doc.text('* Precios sujetos a cotización USD oficial al momento de facturación.',20,fy+22);
-  doc.setFillColor(10,10,10);doc.rect(0,272,210,25,'F');
-  doc.setFontSize(8);doc.setTextColor(80,80,80);
-  doc.text('Torrensen · Armenia 1660, Palermo CABA · Brasil 214, Gerli Bs As',20,281);
-  doc.text('Martín: 11 4430-0826 · Marcos: 11 6647-6471',20,287);
-  doc.save(`${lastOrder.order_number||'OP-Torrensen'}.pdf`);toast('PDF descargado');
+  if(!lastOrder) return;
+  const doc = buildPDF(lastOrder);
+  doc.save(`${lastOrder.order_number||'OP-Torrensen'}.pdf`);
+  toast('PDF descargado');
+}
+
+function buildPDF(order) {
+  const{jsPDF}=window.jspdf;
+  const doc=new jsPDF({unit:'mm',format:'a4'});
+  const W=210, fecha=new Date().toLocaleDateString('es-AR',{day:'2-digit',month:'long',year:'numeric'});
+  const brandColors={langfeite:[191,255,0],ado:[255,140,0],eride:[212,43,43]};
+
+  // ── HEADER BAR ──
+  doc.setFillColor(8,8,8); doc.rect(0,0,W,48,'F');
+  // Red accent line
+  doc.setFillColor(212,43,43); doc.rect(0,48,W,1.5,'F');
+  // Logo
+  doc.setFont('helvetica','bold'); doc.setFontSize(30); doc.setTextColor(242,242,242);
+  doc.text('TOR',20,24); 
+  const torW=doc.getTextWidth('TOR');
+  doc.setTextColor(212,43,43); doc.text('REN',20+torW,24);
+  const renW=doc.getTextWidth('REN');
+  doc.setTextColor(242,242,242); doc.text('SEN',20+torW+renW,24);
+  // Subtitle
+  doc.setFontSize(7); doc.setTextColor(100,100,100); doc.setFont('helvetica','normal');
+  doc.text('PORTAL DE DISTRIBUIDORES',20,31);
+  // Right side — order info
+  doc.setFontSize(8); doc.setTextColor(100,100,100); doc.text('ORDEN DE PEDIDO',145,16);
+  doc.setFont('helvetica','bold'); doc.setFontSize(22); doc.setTextColor(212,43,43);
+  doc.text(order.order_number||'OP',145,27);
+  doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(80,80,80);
+  doc.text(fecha,145,34);
+  // Badge
+  doc.setFillColor(212,43,43); 
+  doc.roundedRect(145,37,40,7,1.5,1.5,'F');
+  doc.setFontSize(6); doc.setTextColor(255,255,255); doc.setFont('helvetica','bold');
+  doc.text('NUEVO PEDIDO',149,42);
+
+  // ── CLIENT SECTION ──
+  const cy=54;
+  doc.setFillColor(14,14,14); doc.roundedRect(15,cy,W-30,30,3,3,'F');
+  doc.setDrawColor(30,30,30); doc.roundedRect(15,cy,W-30,30,3,3,'S');
+  // Label
+  doc.setFillColor(20,20,20); doc.rect(15,cy,W-30,8,'F');
+  doc.setFontSize(6); doc.setTextColor(80,80,80); doc.setFont('helvetica','bold');
+  doc.text('DISTRIBUIDOR',20,cy+5.5);
+  // Data
+  doc.setFontSize(14); doc.setTextColor(242,242,242);
+  doc.text(order.profile?.empresa||'Sin empresa',20,cy+18);
+  doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(120,120,120);
+  doc.text(`Titular: ${order.profile?.nombre||'—'}`,20,cy+24);
+  doc.text(`CUIT: ${order.profile?.cuit||'—'}`,120,cy+24);
+
+  // ── ITEMS TABLE ──
+  const ty=90;
+  doc.setFontSize(6); doc.setTextColor(80,80,80); doc.setFont('helvetica','bold');
+  doc.text(`DETALLE DEL PEDIDO  ·  ${order.items.reduce((s,i)=>s+i.quantity,0)} UNIDADES`,20,ty);
+
+  doc.autoTable({
+    startY:ty+4,
+    head:[['PRODUCTO','MARCA','CANT.','P. UNITARIO','SUBTOTAL','ESTADO']],
+    body:order.items.map(i=>[
+      i.product_name,
+      i.product_brand,
+      i.quantity,
+      `USD ${Number(i.unit_price).toLocaleString()}`,
+      `USD ${Number(i.subtotal).toLocaleString()}`,
+      i.stock_status==='ok'?'OK':'REVISAR'
+    ]),
+    styles:{
+      fillColor:[14,14,14], textColor:[200,200,200],
+      fontSize:9, cellPadding:{top:5,right:6,bottom:5,left:6},
+      lineWidth:0, font:'helvetica'
+    },
+    headStyles:{
+      fillColor:[212,43,43], textColor:[255,255,255],
+      fontStyle:'bold', fontSize:7, letterSpacing:1,
+      cellPadding:{top:4,right:6,bottom:4,left:6}
+    },
+    alternateRowStyles:{fillColor:[18,18,18]},
+    columnStyles:{
+      0:{cellWidth:52,fontStyle:'bold'},
+      1:{cellWidth:30,fontSize:8,textColor:[130,130,130]},
+      2:{cellWidth:16,halign:'center',fontSize:12,fontStyle:'bold',textColor:[242,242,242]},
+      3:{cellWidth:28,halign:'right',fontSize:9,textColor:[150,150,150]},
+      4:{cellWidth:28,halign:'right',fontStyle:'bold',textColor:[242,242,242]},
+      5:{cellWidth:20,halign:'center',fontSize:7}
+    },
+    didParseCell: function(data) {
+      if(data.section==='body'&&data.column.index===5){
+        if(data.cell.raw==='OK'){data.cell.styles.textColor=[34,197,94];}
+        else{data.cell.styles.textColor=[245,158,11];}
+      }
+    },
+    tableLineColor:[30,30,30],
+    tableLineWidth:0.1,
+    margin:{left:15,right:15}
+  });
+
+  // ── TOTAL BAR ──
+  const fy=doc.lastAutoTable.finalY+6;
+  // Gradient effect with 2 rects
+  doc.setFillColor(180,30,30); doc.roundedRect(15,fy,W-30,16,3,3,'F');
+  doc.setFillColor(212,43,43); doc.roundedRect(15,fy,W-30,15,3,3,'F');
+  doc.setFontSize(8); doc.setTextColor(255,255,255,180); doc.setFont('helvetica','normal');
+  doc.text('TOTAL ESTIMADO',22,fy+7);
+  doc.setFontSize(7); doc.setTextColor(255,200,200);
+  doc.text('Sujeto a cotizacion USD oficial',22,fy+12);
+  doc.setFont('helvetica','bold'); doc.setFontSize(18); doc.setTextColor(255,255,255);
+  const totalTxt=`USD ${Number(order.total).toLocaleString()}`;
+  const totalW=doc.getTextWidth(totalTxt);
+  doc.text(totalTxt,W-15-totalW-5,fy+11);
+
+  // ── NOTES ──
+  const ny=fy+24;
+  doc.setFillColor(14,14,14); doc.roundedRect(15,ny,W-30,12,2,2,'F');
+  doc.setDrawColor(191,255,0,25); doc.roundedRect(15,ny,W-30,12,2,2,'S');
+  doc.setFontSize(7); doc.setTextColor(100,100,100); doc.setFont('helvetica','normal');
+  doc.text('Los precios no incluyen IVA y estan sujetos a confirmacion. Pedido generado desde el portal de distribuidores.',20,ny+7);
+
+  // ── FOOTER ──
+  doc.setFillColor(5,5,5); doc.rect(0,272,W,25,'F');
+  doc.setDrawColor(25,25,25); doc.line(0,272,W,272);
+  // Logo small
+  doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(50,50,50);
+  doc.text('TOR',20,280);
+  const ft=doc.getTextWidth('TOR');
+  doc.setTextColor(212,43,43); doc.text('REN',20+ft,280);
+  const fr=doc.getTextWidth('REN');
+  doc.setTextColor(50,50,50); doc.text('SEN',20+ft+fr,280);
+  // Contact
+  doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(70,70,70);
+  doc.text('Armenia 1660, Palermo CABA  |  Brasil 214, Gerli Bs As',20,286);
+  doc.text('Martin: 11 4430-0826  |  Marcos: 11 6647-6471',120,280);
+  doc.setFontSize(6); doc.setTextColor(50,50,50);
+  doc.text('torrensen.com',120,286);
+
+  return doc;
 }
 
 // ═══════════════════════════════════════════════════════
