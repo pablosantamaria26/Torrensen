@@ -696,8 +696,6 @@ html.light #topbar { background:rgba(245,245,245,.94); }
     </div>
   </div>
 </div>
-@keyframes blink { 0%,100%{opacity:1} 55%{opacity:.25} }
-
 <!-- APP -->
 <div id="app">
   <nav id="sidebar">
@@ -986,6 +984,7 @@ function setupRt() {
 
   rtChan = db.channel('rt-prods-dist')
     .on('postgres_changes',{event:'*',schema:'public',table:'products'}, p => {
+      console.log('🔥 RT dist:', p.eventType, p.new?.name, 'stock:', p.new?.stock);
       const evt = p.eventType;
       const prod = p.new;
 
@@ -1026,7 +1025,13 @@ function setupRt() {
         if (curProd) renderModalStock();
       }
     })
-    .subscribe();
+    .subscribe((status, err) => {
+      console.log('📡 RT dist status:', status, err || '');
+      if (status === 'CHANNEL_ERROR') {
+        console.error('❌ RT channel error, retrying in 5s...');
+        setTimeout(() => { rtSetupDone = false; setupRt(); }, 5000);
+      }
+    });
 }
 
 function px(p){return p.price_x5||p.price_publico||0;}
