@@ -5,38 +5,32 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#0A0A0A">
+<meta name="theme-color" content="#F5F5F5">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <title>Torrensen · Distribuidores</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <style>
 :root {
-  --red:#D42B2B; --red-d:#A01F1F; --red-glow:rgba(212,43,43,0.12);
-  --bg:#0A0A0A; --bg2:#111; --bg3:#181818; --bg4:#1E1E1E; --bg5:#242424;
-  --border:rgba(255,255,255,0.06); --border-m:rgba(255,255,255,0.1); --border-red:rgba(212,43,43,0.35);
-  --text:#F2F2F2; --muted:#A0A0A0; --dim:#6B6B6B;
-  --green:#22C55E; --yellow:#D97706; --fluo:#BFFF00;
-  --sidebar:252px;
-  --safe-top: env(safe-area-inset-top, 0px);
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
-  --card-shadow:0 2px 12px rgba(0,0,0,.3);
-}
-html.light {
+  --red:#D42B2B; --red-d:#A01F1F; --red-glow:rgba(212,43,43,0.08);
   --bg:#F5F5F5; --bg2:#FFFFFF; --bg3:#ECECEC; --bg4:#E0E0E0; --bg5:#D4D4D4;
   --border:rgba(0,0,0,0.08); --border-m:rgba(0,0,0,0.12); --border-red:rgba(212,43,43,0.3);
   --text:#1A1A1A; --muted:#666; --dim:#999;
-  --red-glow:rgba(212,43,43,0.08);
+  --green:#22C55E; --yellow:#D97706; --fluo:#16A34A;
+  --sidebar:252px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
   --card-shadow:0 2px 12px rgba(0,0,0,.07);
+  color-scheme:light;
 }
-html.light { color-scheme:light; }
-html.light .loader-logo, html.light .login-logo-sm { color:var(--text); }
-html.light .brand { color:var(--text); }
-html.light #topbar { background:rgba(245,245,245,.94); }
-html.light .toast { background:var(--bg2); }
+.loader-logo, .login-logo-sm { color:var(--text); }
+.brand { color:var(--text); }
+#topbar { background:rgba(245,245,245,.94); }
+.toast { background:var(--bg2); }
 
 *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
 html { height:100%; overflow:hidden; overscroll-behavior:none; }
@@ -178,8 +172,7 @@ body {
   font-size:12px; font-weight:500; color:var(--muted); cursor:pointer;
   border-left:2px solid transparent; transition:all .15s;
 }
-.nav-item:hover { color:var(--text); background:rgba(255,255,255,.02); }
-html.light .nav-item:hover { background:rgba(0,0,0,.03); }
+.nav-item:hover { color:var(--text); background:rgba(0,0,0,.03); }
 .nav-item.active { color:var(--red); border-left-color:var(--red); background:var(--red-glow); }
 .nav-ico { width:15px; text-align:center; font-size:13px; }
 .nav-pill {
@@ -204,14 +197,13 @@ html.light .nav-item:hover { background:rgba(0,0,0,.03); }
 #main { margin-left:var(--sidebar); height:100%; display:flex; flex-direction:column; overflow:hidden; }
 #topbar {
   position:relative; top:0; z-index:50; flex-shrink:0;
-  background:rgba(10,10,10,.94); backdrop-filter:blur(14px) saturate(1.4);
+  background:rgba(245,245,245,.94); backdrop-filter:blur(14px) saturate(1.4);
   border-bottom:1px solid var(--border);
   padding-top:var(--safe-top);
 }
 .topbar-inner {
   height:54px; display:flex; align-items:center; gap:10px; padding:0 20px;
 }
-html.light #topbar { background:rgba(245,245,245,.94); }
 .menu-btn {
   display:none; width:36px; height:36px; border:1px solid var(--border);
   border-radius:7px; background:none; color:var(--text); font-size:17px; cursor:pointer;
@@ -858,8 +850,12 @@ html.light #topbar { background:rgba(245,245,245,.94); }
 // ═══════════════════════════════════════════════════════
 const SUPA_URL = 'https://zfqnvdhaqdgeruientrv.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpmcW52ZGhhcWRnZXJ1aWVudHJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzNDc1NzksImV4cCI6MjA4ODkyMzU3OX0.ATrHQzpkA-N3z2IXRazVmFW9AxjS1wjWA4kjKh6pvTE';
-const EDGE_EMAIL = `${SUPA_URL}/functions/v1/send-order-email`;
 const TORRENSEN_EMAIL = 'Marcosgnr91@gmail.com';
+// EmailJS
+const EMAILJS_PUBLIC_KEY = 'lrqp8-7N-j_WDslMe';
+const EMAILJS_SERVICE = 'service_71obf84';
+const EMAILJS_TEMPLATE_ORDER = 'template_y177axo';
+emailjs.init(EMAILJS_PUBLIC_KEY);
 
 const { createClient } = supabase;
 const db = createClient(SUPA_URL, SUPA_KEY);
@@ -881,16 +877,8 @@ let rtSetupDone = false;
 // ═══════════════════════════════════════════════════════
 // THEME
 // ═══════════════════════════════════════════════════════
-function initTheme() {
-  const saved = localStorage.getItem('torrensen_theme');
-  if (saved === 'light') document.documentElement.classList.add('light');
-}
-function toggleTheme() {
-  document.documentElement.classList.toggle('light');
-  const isLight = document.documentElement.classList.contains('light');
-  localStorage.setItem('torrensen_theme', isLight ? 'light' : 'dark');
-}
-initTheme();
+// Theme: light only
+
 
 // ═══════════════════════════════════════════════════════
 // INIT
@@ -1018,7 +1006,6 @@ function enterApp() {
   document.getElementById('topbar-right').innerHTML=`
     <button class="btn-compare-trigger" id="btn-cmp" onclick="toggleCompareMode()">⚖ Comparar <span class="cmp-count" id="cmp-n">0</span></button>
     <button class="btn-cart-top" onclick="openCart()">📦 Pedido <span class="cart-n" id="cart-n">0</span></button>
-    <button class="theme-toggle" onclick="toggleTheme()" title="Modo claro/oscuro">◑</button>
   `;
 
   renderCatalog();
@@ -1316,20 +1303,21 @@ function showOrderOk(order,res){
 }
 function closeOrderOk(){document.getElementById('order-ok').classList.remove('open');lastOrder=null;}
 async function sendEmail(order){
-  const pdfB64 = generatePDFBase64(order);
-  await fetch(EDGE_EMAIL,{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({
-      order_id:order.id,
-      order_number:order.order_number,
-      distribuidor:order.profile,
-      items:order.items,
-      total:order.total,
-      torrensen_email:TORRENSEN_EMAIL,
-      pdf_base64:pdfB64
-    })
-  });
+  try{
+    const itemsList = order.items.map(i => 
+      `• ${i.product_name} (${i.product_brand}) x${i.quantity} — USD ${Number(i.subtotal).toLocaleString()}`
+    ).join('\n');
+    await emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE_ORDER, {
+      to_email: TORRENSEN_EMAIL,
+      order_number: order.order_number || 'OP',
+      empresa: order.profile?.empresa || '—',
+      nombre: order.profile?.nombre || '—',
+      cuit: order.profile?.cuit || '—',
+      items_list: itemsList,
+      total_items: order.items.reduce((s,i) => s + i.quantity, 0),
+      total: 'USD ' + Number(order.total).toLocaleString(),
+    });
+  }catch(e){console.warn('EmailJS order notification failed:',e)}
 }
 
 // ═══════════════════════════════════════════════════════
